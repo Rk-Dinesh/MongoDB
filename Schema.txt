@@ -1,0 +1,97 @@
+{
+    "users": [
+      {
+        "_id": ObjectId,
+        "name": String,
+        "email": String,
+        "enrollment_date": Date,
+        "mentee_count": Number
+      }
+    ],
+    "codekata": [
+      {
+        "_id": ObjectId,
+        "user_id": ObjectId,
+        "problems_solved": Number,
+        "submission_date": Date
+      }
+    ],
+    "attendance": [
+      {
+        "_id": ObjectId,
+        "user_id": ObjectId,
+        "class_date": Date,
+        "is_present": Boolean
+      }
+    ],
+    "topics": [
+      {
+        "_id": ObjectId,
+        "title": String,
+        "month": Number,
+        "year": Number
+      }
+    ],
+    "tasks": [
+      {
+        "_id": ObjectId,
+        "user_id": ObjectId,
+        "topic_id": ObjectId,
+        "submission_date": Date,
+        "is_submitted": Boolean
+      }
+    ],
+    "company_drives": [
+      {
+        "_id": ObjectId,
+        "drive_date": Date,
+        "participants": [ObjectId] // user_id of participants
+      }
+    ],
+    "mentors": [
+      {
+        "_id": ObjectId,
+        "name": String,
+        "mentee_count": Number
+      }
+    ]
+  }
+  
+
+1.Find all the topics and tasks which are thought in the month of October?
+
+  db.topics.find({ "month": 10 })
+  db.tasks.find({ "submission_date": { $gte: ISODate("2023-10-01"), $lte: ISODate("2023-10-31") } })
+
+2.Find all the company drives which appeared between 15 oct-2020 and 31-oct-2020?
+
+  db.company_drives.find({ "drive_date": { $gte: ISODate("2020-10-15"), $lte: ISODate("2020-10-31") } })
+
+3.Find all the company drives and students who are appeared for the placement.
+
+  db.company_drives.find({}).populate("participants", "name")
+
+4.Find the number of problems solved by the user in codekata?
+
+  db.codekata.aggregate([
+  {
+    $match: { "user_id": ObjectId("user_id_here") }
+  },
+  {
+    $group: {
+      _id: null,
+      total_problems_solved: { $sum: "$problems_solved" }
+    }
+  }
+])
+
+5.Find all the mentors with who has the mentee's count more than 15?
+
+  db.mentors.find({ "mentee_count": { $gt: 15 } })
+
+6.Find the number of users who are absent and task is not submitted  between 15 oct-2020 and 31-oct-2020
+
+  db.attendance.find({
+  "class_date": { $gte: ISODate("2020-10-15"), $lte: ISODate("2020-10-31") },
+  "is_present": false
+}).count()
